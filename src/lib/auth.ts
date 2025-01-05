@@ -77,7 +77,7 @@ export async function setSessionCookie(c: Context, id: number) {
   setCookie(c, JOHAN_AUTH_SESSION, sessionToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "none",
     expires: session.expiresAt,
     path: "/",
   });
