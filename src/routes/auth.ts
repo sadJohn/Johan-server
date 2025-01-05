@@ -61,9 +61,13 @@ authRouter.post(
       })
     )[0];
 
-    await setSessionCookie(c, newUser.id);
+    const { sessionToken, session } = await setSessionCookie(c, newUser.id);
 
-    return c.json({ message: "success", data: newUser });
+    return c.json({
+      message: "success",
+      data: newUser,
+      session: { ...session, sessionToken },
+    });
   }
 );
 
@@ -176,11 +180,12 @@ authRouter.post(
       throw new JohanBadRequestErr();
     }
 
-    await setSessionCookie(c, result.id);
+    const { sessionToken, session } = await setSessionCookie(c, result.id);
 
     return c.json({
       message: "success",
       data: selectUserSchema.safeParse(result),
+      session: { ...session, sessionToken },
     });
   }
 );

@@ -8,8 +8,6 @@ import { sha256 } from "@oslojs/crypto/sha2";
 import { userTable, type User } from "@/db/schema/user";
 import { sessionTable, type Session } from "@/db/schema/session";
 import { db } from "@/db";
-import { setCookie } from "hono/cookie";
-import { JOHAN_AUTH_SESSION } from "@/constants";
 import { Context } from "hono";
 
 export function generateSessionToken(): string {
@@ -73,14 +71,6 @@ export type SessionValidationResult =
 export async function setSessionCookie(c: Context, id: number) {
   const sessionToken = generateSessionToken();
   const session = await createSession(sessionToken, id);
-
-  setCookie(c, JOHAN_AUTH_SESSION, sessionToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "none",
-    expires: session.expiresAt,
-    path: "/",
-  });
 
   return { sessionToken, session };
 }
