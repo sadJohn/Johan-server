@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import { ZodError } from "zod";
 
 export const errorHandler: ErrorHandler = async (error, c) => {
-  console.log("ERROR - ", error);
+  console.log("ERROR - ", error.message);
   if (error instanceof ZodError) {
     c.status(StatusCodes.BAD_REQUEST);
     return c.json({

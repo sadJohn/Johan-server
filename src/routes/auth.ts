@@ -10,7 +10,7 @@ import {
 } from "../db/schema/user";
 import {
   invalidateSession,
-  setSessionCookie,
+  getSessionCookie,
   validateSessionToken,
 } from "@/lib/auth";
 import { getCookie } from "hono/cookie";
@@ -18,8 +18,13 @@ import { AUTH_MODE, JOHAN_AUTH_SESSION } from "@/constants";
 import * as bcrypt from "bcryptjs";
 import { JohanAuthErr, JohanBadRequestErr } from "@/lib/error";
 import { globalGETRateLimit, globalPOSTRateLimit } from "@/lib/request";
+import { Server } from "socket.io";
 
-const authRouter = new Hono();
+const authRouter = new Hono<{
+  Variables: {
+    io: Server;
+  };
+}>();
 
 authRouter.post(
   "/register",
@@ -61,7 +66,7 @@ authRouter.post(
       })
     )[0];
 
-    const { sessionToken, session } = await setSessionCookie(c, newUser.id);
+    const { sessionToken, session } = await getSessionCookie(newUser.id);
 
     return c.json({
       message: "success",
@@ -106,7 +111,7 @@ authRouter.post(
           })
         )[0];
 
-        const { sessionToken, session } = await setSessionCookie(c, newUser.id);
+        const { sessionToken, session } = await getSessionCookie(newUser.id);
 
         return c.json({
           message: "success",
@@ -114,7 +119,7 @@ authRouter.post(
         });
       }
 
-      const { sessionToken, session } = await setSessionCookie(c, result.id);
+      const { sessionToken, session } = await getSessionCookie(result.id);
 
       return c.json({
         message: "success",
@@ -143,7 +148,7 @@ authRouter.post(
           })
         )[0];
 
-        const { sessionToken, session } = await setSessionCookie(c, newUser.id);
+        const { sessionToken, session } = await getSessionCookie(newUser.id);
 
         return c.json({
           message: "success",
@@ -151,7 +156,7 @@ authRouter.post(
         });
       }
 
-      const { sessionToken, session } = await setSessionCookie(c, result.id);
+      const { sessionToken, session } = await getSessionCookie(result.id);
 
       return c.json({
         message: "success",
@@ -180,7 +185,7 @@ authRouter.post(
       throw new JohanBadRequestErr();
     }
 
-    const { sessionToken, session } = await setSessionCookie(c, result.id);
+    const { sessionToken, session } = await getSessionCookie(result.id);
 
     return c.json({
       message: "success",
@@ -191,6 +196,8 @@ authRouter.post(
 );
 
 authRouter.get("/token", async (c) => {
+  const io = c.get("io");
+  io.emit("get user", "get user socket from server!");
   if (!globalGETRateLimit(c)) {
     throw new JohanBadRequestErr("Too many requests");
   }

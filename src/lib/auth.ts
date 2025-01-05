@@ -8,7 +8,6 @@ import { sha256 } from "@oslojs/crypto/sha2";
 import { userTable, type User } from "@/db/schema/user";
 import { sessionTable, type Session } from "@/db/schema/session";
 import { db } from "@/db";
-import { Context } from "hono";
 
 export function generateSessionToken(): string {
   const bytes = new Uint8Array(20);
@@ -68,7 +67,7 @@ export type SessionValidationResult =
   | { session: Session; user: User }
   | { session: null; user: null };
 
-export async function setSessionCookie(c: Context, id: number) {
+export async function getSessionCookie(id: number) {
   const sessionToken = generateSessionToken();
   const session = await createSession(sessionToken, id);
 
