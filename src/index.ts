@@ -1,12 +1,24 @@
 import { Hono } from "hono";
-import { db } from "./db";
-import { usersTable } from "./db/schema";
+import { API_VERSION } from "./constants";
+import authRouter from "./routes/auth";
+import { cors } from "hono/cors";
+import { errorHandler } from "./lib/error-handler";
 
-const app = new Hono();
+const app = new Hono().basePath("/api");
 
-app.get("/", async (c) => {
-  const users = await db.select().from(usersTable);
-  return c.json(users);
-});
+app.use(
+  "/*",
+  cors({
+    origin: process.env.CORS_ORIGIN!,
+    credentials: true,
+  })
+);
 
-export default app;
+app.route(`/${API_VERSION}/auth`, authRouter);
+
+app.onError(errorHandler);
+
+export default {
+  port: process.env.PORT || 3000,
+  fetch: app.fetch,
+};
