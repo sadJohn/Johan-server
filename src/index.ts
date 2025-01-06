@@ -15,7 +15,7 @@ const app = new Hono<{
 
 const socketServer = createServer(app.fetch as any);
 const io = initSocket(socketServer);
-socketServer.listen(process.env.SOCKET_PORT || 4000);
+// socketServer.listen(process.env.SOCKET_PORT || 4000);
 
 app.use(async (c, next) => {
   c.set("io", io);
@@ -24,7 +24,7 @@ app.use(async (c, next) => {
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN!,
+    origin: [process.env.CORS_ORIGIN!, "http://localhost:3000"],
     credentials: true,
   })
 );
