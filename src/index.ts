@@ -7,6 +7,7 @@ import { errorHandler } from "./lib/error-handler";
 import { Server } from "socket.io";
 import { initSocket } from "./lib/socket";
 import { serve } from "@hono/node-server";
+import type { Server as HTTPServer } from "node:http";
 
 const app = new Hono<{
   Variables: {
@@ -19,7 +20,7 @@ const httpServer = serve({
   port: 8000,
 });
 
-const io = initSocket(httpServer);
+const io = initSocket(httpServer as HTTPServer);
 
 app.use(async (c, next) => {
   c.set("io", io);

@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
+import type { Server as HTTPServer } from "node:http";
 
-export function initSocket(server: any) {
+export function initSocket(server: HTTPServer) {
   const io = new Server(server, {
     cors: {
       origin: [process.env.CORS_ORIGIN!, "http://localhost:3000"],
