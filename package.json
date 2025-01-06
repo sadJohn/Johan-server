@@ -1,5 +1,6 @@
 {
   "name": "johan-server",
+  "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "db:push": "npx drizzle-kit push",
