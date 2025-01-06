@@ -1,11 +1,12 @@
+import "dotenv/config";
 import { Hono } from "hono";
 import { API_VERSION } from "./constants";
 import authRouter from "./routes/auth";
 import { cors } from "hono/cors";
 import { errorHandler } from "./lib/error-handler";
-import { createServer } from "http";
 import { Server } from "socket.io";
 import { initSocket } from "./lib/socket";
+import { serve } from "@hono/node-server";
 
 const app = new Hono<{
   Variables: {
@@ -13,9 +14,12 @@ const app = new Hono<{
   };
 }>().basePath("/api");
 
-const socketServer = createServer(app.fetch as any);
-const io = initSocket(socketServer);
-// socketServer.listen(process.env.SOCKET_PORT || 4000);
+const httpServer = serve({
+  fetch: app.fetch,
+  port: 8000,
+});
+
+const io = initSocket(httpServer);
 
 app.use(async (c, next) => {
   c.set("io", io);
@@ -32,8 +36,3 @@ app.use(
 app.route(`/${API_VERSION}/auth`, authRouter);
 
 app.onError(errorHandler);
-
-export default {
-  port: process.env.PORT || 3000,
-  fetch: app.fetch,
-};

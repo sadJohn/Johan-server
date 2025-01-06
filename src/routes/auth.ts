@@ -171,7 +171,6 @@ authRouter.post(
     const result = (
       await db.select().from(userTable).where(eq(userTable.email, user.email))
     )[0];
-
     if (!result) {
       throw new JohanBadRequestErr();
     }
