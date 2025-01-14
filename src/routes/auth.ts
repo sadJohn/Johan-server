@@ -9,7 +9,12 @@ import { JohanBadRequestErr } from '@/lib/error'
 import { globalPOSTRateLimit } from '@/lib/request'
 
 import { db } from '../db'
-import { loginSchema, registerSchema, userTable } from '../db/schema/user'
+import {
+  loginSchema,
+  registerSchema,
+  selectUserSchema,
+  userTable
+} from '../db/schema/user'
 
 const authRouter = new Hono<{
   Variables: {
@@ -59,7 +64,7 @@ authRouter.post(
 
     return c.json({
       message: 'success',
-      data: newUser.id
+      data: selectUserSchema.safeParse(newUser).data
     })
   }
 )
@@ -101,7 +106,7 @@ authRouter.post(
 
       return c.json({
         message: 'success',
-        data: result.id
+        data: selectUserSchema.safeParse(result).data
       })
     }
 
@@ -138,13 +143,13 @@ authRouter.post(
 
       return c.json({
         message: 'success',
-        data: newUser.id
+        data: selectUserSchema.safeParse(newUser).data
       })
     }
 
     return c.json({
       message: 'success',
-      data: result.id
+      data: selectUserSchema.safeParse(result).data
     })
   }
 )
