@@ -22,6 +22,7 @@
     "@hono/zod-validator": "^0.4.2",
     "@neondatabase/serverless": "^0.10.4",
     "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.5.1",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.38.3",
     "drizzle-zod": "^0.6.1",

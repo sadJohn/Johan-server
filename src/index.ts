@@ -9,6 +9,7 @@ import { API_VERSION } from './constants'
 import { errorHandler } from './lib/error-handler'
 import { initSocket } from './lib/socket'
 import authRouter from './routes/auth'
+import profileRouter from './routes/profile'
 import sessionRouter from './routes/session'
 
 const app = new Hono<{
@@ -37,6 +38,7 @@ app.use(
 )
 
 app.route(`/${API_VERSION}/auth`, authRouter)
+app.route(`/${API_VERSION}/profile`, profileRouter)
 app.route(`/${API_VERSION}/session`, sessionRouter)
 
 app.onError(errorHandler)

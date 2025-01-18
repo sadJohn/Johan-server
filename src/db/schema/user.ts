@@ -17,6 +17,7 @@ export const userTable = pgTable('user', {
   email: varchar({ length: 255 }).unique(),
   password: varchar({ length: 255 }),
   age: integer(),
+  pictureId: varchar('picture_id', { length: 255 }),
   picture: varchar({ length: 255 }),
   githubId: integer().unique(),
   googleId: integer().unique(),
