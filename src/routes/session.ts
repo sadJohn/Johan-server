@@ -27,7 +27,7 @@ sessionRouter.post(
       })
       .returning()
 
-    return c.json({ message: 'success', data: newSession })
+    return c.json({ message: 'success', data: newSession[0] })
   }
 )
 
