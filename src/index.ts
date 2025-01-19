@@ -16,7 +16,7 @@ const app = new Hono<{
   Variables: {
     io: Server
   }
-}>().basePath('/api')
+}>().basePath(`/api/${API_VERSION}`)
 
 const httpServer = serve({
   fetch: app.fetch,
@@ -37,8 +37,8 @@ app.use(
   })
 )
 
-app.route(`/${API_VERSION}/auth`, authRouter)
-app.route(`/${API_VERSION}/profile`, profileRouter)
-app.route(`/${API_VERSION}/session`, sessionRouter)
+app.route(`/auth`, authRouter)
+app.route(`/profile`, profileRouter)
+app.route(`/session`, sessionRouter)
 
 app.onError(errorHandler)
