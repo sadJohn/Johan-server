@@ -4,7 +4,7 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 
 import { db } from '@/db'
-import { userTable } from '@/db/schema'
+import { selectUserSchema, userTable } from '@/db/schema'
 import { followInsertSchema, followTable } from '@/db/schema/follow'
 import cloudinary from '@/lib/cloudinary'
 import { JohanBadRequestErr } from '@/lib/error'
@@ -52,56 +52,59 @@ const paginationSchema = z.object({
   offset: z.coerce.number().default(0)
 })
 
-profileRouter.get(
-  '/followers/:userId',
-  zValidator('param', z.object({ userId: z.coerce.number() }), (result) => {
-    if (!result.success) {
-      throw new JohanBadRequestErr()
+profileRouter
+  .get(
+    '/followers/:userId',
+    zValidator('param', z.object({ userId: z.coerce.number() }), (result) => {
+      if (!result.success) {
+        throw new JohanBadRequestErr()
+      }
+    }),
+    zValidator('query', paginationSchema, (result) => {
+      if (!result.success) {
+        throw new JohanBadRequestErr()
+      }
+    }),
+    async (c) => {
+      const { userId } = c.req.valid('param')
+      const { limit, offset } = c.req.valid('query')
+
+      const sq = db
+        .select()
+        .from(followTable)
+        .where(eq(followTable.followingId, userId))
+        .limit(limit)
+        .offset(offset)
+        .as('sq')
+      const result = await db
+        .select()
+        .from(userTable)
+        .innerJoin(sq, eq(userTable.id, sq.userId))
+
+      return c.json({
+        message: 'success',
+        data: result.map((i) => selectUserSchema.safeParse(i.user).data)
+      })
     }
-  }),
-  zValidator('query', paginationSchema, (result) => {
-    if (!result.success) {
-      throw new JohanBadRequestErr()
+  )
+  .get(
+    '/followers/:userId/count',
+    zValidator('param', z.object({ userId: z.coerce.number() }), (result) => {
+      if (!result.success) {
+        throw new JohanBadRequestErr()
+      }
+    }),
+    async (c) => {
+      const { userId } = c.req.valid('param')
+
+      const result = await db
+        .select({ count: count() })
+        .from(followTable)
+        .where(eq(followTable.followingId, userId))
+
+      return c.json({ message: 'success', data: result[0] })
     }
-  }),
-  async (c) => {
-    const { userId } = c.req.valid('param')
-    const { limit, offset } = c.req.valid('query')
-
-    const sq = db
-      .select()
-      .from(followTable)
-      .where(eq(followTable.followingId, userId))
-      .limit(limit)
-      .offset(offset)
-      .as('sq')
-    const result = await db
-      .select()
-      .from(userTable)
-      .innerJoin(sq, eq(userTable.id, sq.userId))
-
-    return c.json({ message: 'success', data: result })
-  }
-)
-
-profileRouter.get(
-  '/followers/:userId/count',
-  zValidator('param', z.object({ userId: z.coerce.number() }), (result) => {
-    if (!result.success) {
-      throw new JohanBadRequestErr()
-    }
-  }),
-  async (c) => {
-    const { userId } = c.req.valid('param')
-
-    const result = await db
-      .select({ count: count() })
-      .from(followTable)
-      .where(eq(followTable.followingId, userId))
-
-    return c.json({ message: 'success', data: result[0] })
-  }
-)
+  )
 
 profileRouter
   .get(
@@ -135,7 +138,10 @@ profileRouter
         .from(userTable)
         .innerJoin(sq, eq(userTable.id, sq.followingId))
 
-      return c.json({ message: 'success', data: result })
+      return c.json({
+        message: 'success',
+        data: result.map((i) => selectUserSchema.safeParse(i.user).data)
+      })
     }
   )
   .get(
