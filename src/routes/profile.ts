@@ -1,5 +1,5 @@
 import { zValidator } from '@hono/zod-validator'
-import { count, eq } from 'drizzle-orm'
+import { and, count, eq } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
 
@@ -173,6 +173,28 @@ profileRouter.post(
   async (c) => {
     const follow = c.req.valid('json')
     await db.insert(followTable).values(follow)
+
+    return c.json({ message: 'success' })
+  }
+)
+
+profileRouter.delete(
+  '/following',
+  zValidator('json', followInsertSchema, (result) => {
+    if (!result.success) {
+      throw new JohanBadRequestErr()
+    }
+  }),
+  async (c) => {
+    const follow = c.req.valid('json')
+    await db
+      .delete(followTable)
+      .where(
+        and(
+          eq(followTable.userId, follow.userId),
+          eq(followTable.followingId, follow.followingId)
+        )
+      )
 
     return c.json({ message: 'success' })
   }
